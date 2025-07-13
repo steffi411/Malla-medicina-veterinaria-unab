@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla MV UNAB Interactiva</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Malla Medicina Veterinaria – UNAB</h1>
+  <div id="malla-container"></div>
+  <svg id="prereq-lines"></svg>
+  <script src="script.js"></script>
+</body>
+</html>
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+#malla-container {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+.curso {
+  background: #e0f1f7;
+  padding: 10px;
+  border: 1px solid #0077a3;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.curso:hover { background: #c4e4f0; }
+#prereq-lines {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+const cursos = [
+  { id: 'bio1', nombre: "Biología Celular", semestre: 1, x:1, y:1, prereq: [] },
+  { id: 'qui', nombre: "Química General", semestre: 1, x:2, y:1, prereq: [] },
+  { id: 'anatom1', nombre: "Anatomía Animal I", semestre: 2, x:1, y:2, prereq: ['bio1','qui'] },
+  { id: 'fisiol1', nombre: "Fisiología Animal I", semestre: 2, x:2, y:2, prereq: ['bio1'] },
+  { id: 'hist', nombre: "Histología Animal", semestre: 2, x:3, y:2, prereq: ['bio1'] },
+  { id: 'anatom2', nombre: "Anatomía Animal II", semestre:3, x:1, y:3, prereq: ['anatom1'] },
+  { id: 'fisiol2', nombre: "Fisiología Animal II", semestre:3, x:2, y:3, prereq: ['fisiol1','anatom1'] },
+  // ... añade más cursos según tu malla
+];
+
+const container = document.getElementById("malla-container");
+const svg = document.getElementById("prereq-lines");
+
+// Agrega DIVs de cursos
+cursos.forEach(c => {
+  const div = document.createElement("div");
+  div.id = c.id;
+  div.className = "curso";
+  div.innerText = c.nombre;
+  div.style.gridColumn = c.x;
+  div.style.gridRow = c.y;
+  container.appendChild(div);
+});
+
+// Dibuja líneas de prerequisitos
+setTimeout(() => {
+  cursos.forEach(c => {
+    c.prereq.forEach(pid => {
+      const a = document.getElementById(pid).getBoundingClientRect();
+      const b = document.getElementById(c.id).getBoundingClientRect();
+      const parentRect = container.getBoundingClientRect();
+
+      const x1 = a.left + a.width/2 - parentRect.left;
+      const y1 = a.top + a.height/2 - parentRect.top;
+      const x2 = b.left + b.width/2 - parentRect.left;
+      const y2 = b.top + b.height/2 - parentRect.top;
+
+      const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+      line.setAttribute("x1", x1);
+      line.setAttribute("y1", y1);
+      line.setAttribute("x2", x2);
+      line.setAttribute("y2", y2);
+      line.setAttribute("stroke", "#0077a3");
+      line.setAttribute("stroke-width", "2");
+      svg.appendChild(line);
+    });
+  });
+}, 100);
